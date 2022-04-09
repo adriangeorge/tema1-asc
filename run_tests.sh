@@ -7,7 +7,7 @@ PYTHON_CMD=python3
 
 for i in {1..8}
 do
-    TIMEOUT_VALS[$i]=3
+    TIMEOUT_VALS[$i]=30
 done
 for i in {9..10}
 do
@@ -18,7 +18,7 @@ done
 rm -f ${TESTS}/*.out.sorted
 
 # Run tests
-for i in {1..1}
+for i in {1..10}
 do
     prefix=$(printf "%02d" $i)
     rm -f "${TESTS}/$prefix".out

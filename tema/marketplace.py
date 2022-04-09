@@ -5,16 +5,12 @@ Computer Systems Architecture Course
 Assignment 1
 March 2021
 """
-
-from cmath import log
-from math import prod
-from threading import Lock, Semaphore
-from typing import List
-import unittest
-from tema.product import Product
-
 import logging
 from logging.handlers import RotatingFileHandler
+
+from threading import Lock, Semaphore
+import unittest
+from .product import Product
 
 
 class Marketplace:
@@ -32,6 +28,7 @@ class Marketplace:
         """
         self.q_limit = queue_size_per_producer
         self.producers = []
+        self.carts = []
         self.consumers = []
         self.lock = Lock()
 
@@ -42,12 +39,13 @@ class Marketplace:
             'my_log.log', maxBytes=32000, backupCount=10)
         rfh.setLevel(logging.INFO)
         formatter = logging.Formatter(
-            # %(asctime)s - %(name)s - %(levelname)s - 
+            # %(asctime)s - %(name)s - %(levelname)s -
             '%(message)s')
         rfh.setFormatter(formatter)
         logger.addHandler(rfh)
         self.logger = logger
         self.mname = "market"
+        self.all_completed = False
 
     # Wrapper on logger
     def log(self, msg, src):
@@ -65,7 +63,7 @@ class Marketplace:
         }
         self.producers.append(new_producer)
 
-        log_msg = "Registered new PROD id: " + str(new_producer['id'])
+        log_msg = "REG PROD [" + str(new_producer['id']) + ']'
         self.log(log_msg, self.mname)
         return new_producer['id']
 
@@ -86,21 +84,22 @@ class Marketplace:
         prod_esem = self.producers[producer_id]['empty_sem']
         prod_fsem = self.producers[producer_id]['full_sem']
 
-        log_msg = "Got PUB req from " + \
-            str(producer_id) + " for " + str(product)
+        log_msg = "REQ PUB S:PROD[" + \
+            str(producer_id) + "] " + str(product)
         self.log(log_msg, self.mname)
         acquired = prod_esem.acquire(blocking=False)
         if not acquired:
-            log_msg = "REJECT PUB req from " + \
-                str(producer_id) + " for " + str(product)
+            log_msg = "REJ PUB S:PROD[" + \
+                str(producer_id) + "] " + str(product)
             self.log(log_msg, self.mname)
             return False
 
         prod_queue.append([product, True])
-        log_msg = "ACCEPT PUB req from " + \
-            str(producer_id) + " for " + \
-            str(product) + " remaining slots " + \
-            str(self.q_limit - len(prod_queue))
+        log_msg = "ACC PUB S:PROD[" + \
+            str(producer_id) + "] " + \
+            str(product) + " SLOTS [" + \
+            str(self.q_limit - len(prod_queue)) + \
+            "]"
         self.log(log_msg, self.mname)
         prod_fsem.release()
         return True
@@ -112,15 +111,28 @@ class Marketplace:
         :returns an int representing the cart_id
         """
         new_cart = {
-            'id': len(self.consumers),
-            'items': []
+            'id': len(self.carts),
+            'items': [],
+            'completed': False,
+            'owner': ""
         }
-        self.consumers.append(new_cart)
+        self.carts.append(new_cart)
 
         # Log register success
-        log_msg = "Registered new CART id: " + str(new_cart['id'])
+        log_msg = "REG CART [" + str(new_cart['id']) + "]"
         self.log(log_msg, self.mname)
         return new_cart['id']
+
+    def assign_owner(self, cart_id: int, owner: str):
+        """
+        Add owner to cart and to customer list if they were not already added
+        """
+        for cart in self.carts:
+            if cart['id'] == cart_id:
+                cart['owner'] = owner
+
+        if owner not in self.consumers:
+            self.consumers.append(owner)
 
     def product_search(self, name: str):
         """
@@ -134,16 +146,15 @@ class Marketplace:
         """
         item_prod = None
         for producer in self.producers:
-            req_item = None
-            for p in producer['queue']:
+            for prod in producer['queue']:
 
-                if p[0].name == name and p[1]:
-                    item_prod = (p, producer)
-                    log_msg = "Found " + \
-                        str(p) + " at PROD[" + \
+                if prod[0].name == name and prod[1]:
+                    item_prod = (prod, producer)
+                    log_msg = "ITEM AVAILABLE " + \
+                        str(prod) + " IN PROD[" + \
                         str(producer['id']) + ']'
                     self.log(log_msg, self.mname)
-                    return item_prod     
+                    return item_prod
 
     def add_to_cart(self, cart_id: int, product: Product):
         """
@@ -158,11 +169,11 @@ class Marketplace:
         :returns True or False. If the caller receives False, it should wait and then try again
         """
 
-        log_msg = "Got ADD req from " + str(cart_id) + " for " + str(product)
+        log_msg = "REQ ADD S:CART[" + str(cart_id) + "] " + str(product)
         self.log(log_msg, self.mname)
 
         # Get the referenced cart
-        c_iter = iter(self.consumers)
+        c_iter = iter(self.carts)
         cart = next((c for c in c_iter if c['id'] == cart_id), None)
 
         # Search requested product in all producer catalogues
@@ -177,12 +188,10 @@ class Marketplace:
 
                 # Add item to user's cart
                 cart['items'].append(item_prod)
-                for e in cart['items']:
-                    self.log(str(e[0]), "M")
                 return True
 
         else:
-            log_msg = "Could not find " + str(product)
+            log_msg = "ITEM NOT AVAILABLE " + str(product)
             self.log(log_msg, self.mname)
             return False
 
@@ -197,14 +206,20 @@ class Marketplace:
         :param product: the product to remove from cart
         """
 
-        # Get the referenced cart
-        c_iter = iter(self.consumers)
-        cart = next((c for c in c_iter if c['id'] == cart_id), None)
-
+        # Search for matching item in cart and remove it
         req_prod_name = product.name
-        for p in self.consumers[cart_id]['items']:
-            if p[0].name == req_prod_name:
-                req_item = p
+        prod_to_remove = None
+        for prod in self.carts[cart_id]['items']:
+            if prod[0][0].name == req_prod_name:
+                prod[0][1] = True
+                prod_to_remove = prod
+
+        bf = len(self.carts[cart_id]['items'])
+        self.carts[cart_id]['items'].remove(prod_to_remove)
+        # Log DEL request
+        af = len(self.carts[cart_id]['items'])
+        log_msg = "REQ DEL " + str(prod_to_remove) + str(bf) + " " + str(af)
+        self.log(log_msg, self.mname) 
 
     def place_order(self, cart_id: int):
         """
@@ -213,7 +228,31 @@ class Marketplace:
         :type cart_id: Int
         :param cart_id: id cart
         """
-        pass
+        # Mark cart as completed and check if there are any remaining
+        # Carts, if no remaining carts send shutdown signal to producer
+        self.carts[cart_id]['completed'] = True
+
+        # Remove bought items from producer storage
+        for item in self.carts[cart_id]['items']:
+            producer = item[1]
+            prod_esem = producer['empty_sem']
+            prod_fsem = producer['full_sem']
+
+            prod_fsem.acquire()
+            producer['queue'].remove(item[0])
+            prod_esem.release()
+
+        all_completed = True
+        for cart in self.carts:
+            if(not cart['completed']):
+                all_completed = False
+
+        # Print output
+        for item in self.carts[cart_id]['items']:
+            print(cart['owner'] + ' bought ' + str(item[0][0]))
+
+    def sign_out(self, cons: str):
+        self.consumers.remove(cons)
 
 
 class TestMarketplace(unittest.TestCase):

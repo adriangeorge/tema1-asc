@@ -74,8 +74,8 @@ class Producer(Thread):
 
             # Produces an item and checks what the next produced item should be
             produced_item = self.produce()
-            log_msg = "Produced a " + produced_item.name
-            self.marketplace.log(log_msg, str(self.kwargs['name']))
+            # log_msg = "Produced a " + produced_item.name
+            # self.marketplace.log(log_msg, str(self.kwargs['name']))
             if(len(self.products) > self.curr_index):
                 if self.curr_product[1] == 0:
                     self.curr_product = list(self.products[self.curr_index])
@@ -87,11 +87,14 @@ class Producer(Thread):
             # published
             wasPublished = False
             while not wasPublished:
-                log_msg = "Sending publish " + produced_item.name
-                self.marketplace.log(log_msg, str(self.kwargs['name']))
+                # log_msg = "Sending publish " + produced_item.name
+                # self.marketplace.log(log_msg, str(self.kwargs['name']))
                 wasPublished = self.marketplace.publish(
                     self.prodId, produced_item)
                 if(not wasPublished):
-                    log_msg = "Waiting"
-                    self.marketplace.log(log_msg, str(self.kwargs['name']))
+                    # log_msg = "Waiting"
+                    # self.marketplace.log(log_msg, str(self.kwargs['name']))
                     sleep(self.republish_wait_time)
+
+            if len(self.marketplace.consumers) == 0:
+                loopFlag = False
