@@ -1,7 +1,0 @@
-Started producer prod1
-Produced a Linden
-Got publish req from 0 for Tea(name='Linden', price=9, type='Herbal')
-Produced a Linden
-Got publish req from 0 for Tea(name='Linden', price=9, type='Herbal')
-Produced a Indonezia
-Got publish req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')

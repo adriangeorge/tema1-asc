@@ -7,6 +7,10 @@ March 2021
 """
 
 from threading import Thread
+from time import sleep
+from typing import List
+
+from tema.marketplace import Marketplace
 
 
 class Consumer(Thread):
@@ -14,7 +18,7 @@ class Consumer(Thread):
     Class that represents a consumer.
     """
 
-    def __init__(self, carts, marketplace, retry_wait_time, **kwargs):
+    def __init__(self, carts: List, marketplace: Marketplace, retry_wait_time: float, **kwargs):
         """
         Constructor.
 
@@ -33,5 +37,65 @@ class Consumer(Thread):
         """
         Thread.__init__(self)
 
+        # Init variables
+        self.carts = carts
+        self.marketplace = marketplace
+        self.retry_wait_time = retry_wait_time
+        self.kwargs = kwargs
+        self.logger = marketplace.logger
+
     def run(self):
-        pass
+
+        # Log starting confirmation messasge
+        log_msg = "Started consumer " + str(self.kwargs['name'])
+        self.marketplace.log(log_msg, str(self.kwargs['name']))
+
+        # Main consumer loop
+        for cart in self.carts:
+            # Register cart
+            cart_id = self.marketplace.new_cart()
+            cart_iter = iter(cart)
+
+            # Find next item in cart to request
+            req_item = next((item for item in cart_iter), None)
+
+            # Keep requesting until item is available
+            while req_item is not None:
+
+                if req_item['type'] == 'add':
+                    self.marketplace.log(str(req_item['quantity']), "qty")
+                    # Log ADD request
+                    log_msg = "Requesting ADD " + str(req_item['product'])
+                    self.marketplace.log(log_msg, str(self.kwargs['name']))
+                    res = self.marketplace.add_to_cart(
+                        cart_id, req_item['product'])
+
+                    if(res == True):
+                        # Log request success
+                        log_msg = "I have RECEIVED " + str(req_item['product'])
+                        self.marketplace.log(log_msg, str(self.kwargs['name']))
+                        req_item['quantity'] -= 1
+
+                        if(req_item['quantity'] == 0):
+                            req_item = next((item for item in cart_iter), None)
+                    else:
+                        # Log request failure
+                        log_msg = "I was DENIED " + \
+                            str(req_item['product']) + " WAITING"
+                        self.marketplace.log(log_msg, str(self.kwargs['name']))
+                        sleep(self.retry_wait_time)
+
+                elif req_item['type'] == 'remove':
+                    # Log DEL request
+                    log_msg = "Requesting DEL " + str(req_item['product'])
+                    self.marketplace.log(log_msg, str(self.kwargs['name']))
+
+                    self.marketplace.remove_from_cart(
+                        cart_id, req_item['product'])
+
+                    req_item = next((item for item in cart_iter), None)
+
+            # All items in cart were processed, place the order
+            log_msg = "Got all items! PLACING ORDER!"
+            self.marketplace.log(log_msg, str(self.kwargs['name']))
+            self.marketplace.place_order(cart_id)

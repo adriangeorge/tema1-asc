@@ -1,0 +1,121 @@
+prod1:Started producer prod1
+market:Registered new PROD id: 0
+cons1:Started consumer cons1
+market:Registered new CART id: 0
+qty:1
+cons1:Requesting ADD Tea(name='Linden', price=9, type='Herbal')
+market:Got ADD req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:Could not find Tea(name='Linden', price=9, type='Herbal')
+cons1:I was DENIED Tea(name='Linden', price=9, type='Herbal') WAITING
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 14
+qty:1
+cons1:Requesting ADD Tea(name='Linden', price=9, type='Herbal')
+market:Got ADD req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:Found [Tea(name='Linden', price=9, type='Herbal'), True] at PROD[0]
+M:[Tea(name='Linden', price=9, type='Herbal'), False]
+cons1:I have RECEIVED Tea(name='Linden', price=9, type='Herbal')
+qty:3
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Could not find Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:I was DENIED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') WAITING
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 13
+prod1:Produced a Indonezia
+prod1:Sending publish Indonezia
+market:Got PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:ACCEPT PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') remaining slots 12
+qty:3
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Found [Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), True] at PROD[0]
+M:[Tea(name='Linden', price=9, type='Herbal'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+cons1:I have RECEIVED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+qty:2
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Could not find Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:I was DENIED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') WAITING
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 11
+qty:2
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Could not find Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:I was DENIED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') WAITING
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 10
+prod1:Produced a Indonezia
+prod1:Sending publish Indonezia
+market:Got PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:ACCEPT PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') remaining slots 9
+qty:2
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Found [Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), True] at PROD[0]
+M:[Tea(name='Linden', price=9, type='Herbal'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+cons1:I have RECEIVED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+qty:1
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Could not find Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:I was DENIED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') WAITING
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 8
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 7
+qty:1
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Could not find Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:I was DENIED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') WAITING
+prod1:Produced a Indonezia
+prod1:Sending publish Indonezia
+market:Got PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:ACCEPT PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') remaining slots 6
+qty:1
+cons1:Requesting ADD Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Got ADD req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:Found [Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), True] at PROD[0]
+M:[Tea(name='Linden', price=9, type='Herbal'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+M:[Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM'), False]
+cons1:I have RECEIVED Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+cons1:Requesting DEL Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 5
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 4
+prod1:Produced a Indonezia
+prod1:Sending publish Indonezia
+market:Got PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM')
+market:ACCEPT PUB req from 0 for Coffee(name='Indonezia', price=1, acidity=5.05, roast_level='MEDIUM') remaining slots 3
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 2
+prod1:Produced a Linden
+prod1:Sending publish Linden
+market:Got PUB req from 0 for Tea(name='Linden', price=9, type='Herbal')
+market:ACCEPT PUB req from 0 for Tea(name='Linden', price=9, type='Herbal') remaining slots 1

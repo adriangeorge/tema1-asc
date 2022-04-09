@@ -7,6 +7,7 @@ March 2021
 """
 
 from itertools import product
+import logging
 from math import prod
 from threading import Thread
 from time import sleep
@@ -64,26 +65,33 @@ class Producer(Thread):
         return self.curr_product[0]
 
     def run(self):
-        print("Started producer " + str(self.kwargs['name']))
+        log_msg = "Started producer " + str(self.kwargs['name'])
+        self.marketplace.log(log_msg, str(self.kwargs['name']))
+
         self.prodId = self.marketplace.register_producer()
-        
         loopFlag = True
         while loopFlag:
 
             # Produces an item and checks what the next produced item should be
             produced_item = self.produce()
-            print("Produced a " + produced_item.name)
+            log_msg = "Produced a " + produced_item.name
+            self.marketplace.log(log_msg, str(self.kwargs['name']))
             if(len(self.products) > self.curr_index):
                 if self.curr_product[1] == 0:
                     self.curr_product = list(self.products[self.curr_index])
             else:
-                loopFlag = False
+                self.curr_product = list(self.products[0])
+                self.curr_index = 0
 
             # Publishes the new item on the marketplace or waits until it can be
             # published
             wasPublished = False
             while not wasPublished:
-                wasPublished = self.marketplace.publish(self.prodId, produced_item)
+                log_msg = "Sending publish " + produced_item.name
+                self.marketplace.log(log_msg, str(self.kwargs['name']))
+                wasPublished = self.marketplace.publish(
+                    self.prodId, produced_item)
                 if(not wasPublished):
+                    log_msg = "Waiting"
+                    self.marketplace.log(log_msg, str(self.kwargs['name']))
                     sleep(self.republish_wait_time)
-                
