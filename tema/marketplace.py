@@ -46,8 +46,10 @@ class Marketplace:
         self.mname = "MK"
         self.all_completed = False
 
-    # Wrapper on logger
     def log(self, msg, src):
+        """
+            Simple wrapper for logging
+        """
         self.logger.info(src + ":" + msg)
 
     def register_producer(self):
@@ -106,6 +108,7 @@ class Marketplace:
 
         :returns an int representing the cart_id
         """
+        self.lock.acquire()
         new_cart = {
             'id': len(self.carts),
             'items': [],
@@ -113,6 +116,7 @@ class Marketplace:
             'owner': ""
         }
         self.carts.append(new_cart)
+        self.lock.release()
 
         # Log register success
         log_msg = "REG CART [" + str(new_cart['id']) + "]"
@@ -138,7 +142,8 @@ class Marketplace:
         :type name: String
         :param name: Name of product to be searched
 
-        :returns Pair of item and its availabilty as first element of tuple and reference to producer 
+        :returns Pair of item and its availabilty as first
+        element of tuple and reference to producer
         """
         item_prod = None
         for producer in self.producers:
@@ -165,8 +170,8 @@ class Marketplace:
         :returns True or False. If the caller receives False, it should wait and then try again
         """
 
-        log_msg = "ADD REQ [" + self.carts[cart_id]['owner'] + "][C" + str(cart_id) + "] " + str(product)
-        
+        log_msg = "ADD REQ [" + self.carts[cart_id]['owner'] + \
+            "][C" + str(cart_id) + "] " + str(product)
 
         # Get the referenced cart
         c_iter = iter(self.carts)
@@ -236,46 +241,50 @@ class Marketplace:
             producer = item[1]
             prod_esem = producer['empty_sem']
             prod_fsem = producer['full_sem']
-            prod_fsem.acquire()
-            producer['queue'].remove(item[0])
-            prod_esem.release()
 
-        all_completed = True
-        for cart in self.carts:
-            if(not cart['completed']):
-                all_completed = False
+            prod_fsem.acquire()
+            if item[0] in producer['queue']:
+                producer['queue'].remove(item[0])
+            else:
+                err_log = "ERR COULD NOT FIND " + str(item[0])
+                self.log(err_log, self.mname)
+            prod_esem.release()
 
         # Print output
         for item in self.carts[cart_id]['items']:
-            log_msg += self.carts[cart_id]['owner'] + ' bought ' + str(item[0][0]) + '\n'
+            log_msg += self.carts[cart_id]['owner'] + \
+                ' bought ' + str(item[0][0]) + '\n'
 
         print(log_msg[1:-1])
         self.log(log_msg, self.mname)
 
     def sign_out(self, cons: str):
-        log_msg = "LOGOUT " + cons
-        self.log(log_msg, self.mname)
+        """
+        Function called by consumers when finishing all their requests
+        When all consumers have signed out all producer processes will also stop
+        """
         self.consumers.remove(cons)
+        log_msg = "LOGOUT " + cons + " REMAINING " + str(len(self.consumers))
+        self.log(log_msg, self.mname)
 
+# class TestMarketplace(unittest.TestCase):
+#     def setUp(self):
+#         self.marketplace = Marketplace(5)
 
-class TestMarketplace(unittest.TestCase):
-    def setUp(self):
-        self.marketplace = Marketplace(5)
+#     def test_1_register_producer(self):
+#         pass
 
-    def test_1_register_producer(self):
-        pass
+#     def test_2_new_cart(self):
+#         pass
 
-    def test_2_new_cart(self):
-        pass
+#     def test_3_publish(self):
+#         pass
 
-    def test_3_publish(self):
-        pass
+#     def test_4_add_to_cart(self):
+#         pass
 
-    def test_4_add_to_cart(self):
-        pass
+#     def test_5_remove_from_cart(self):
+#         pass
 
-    def test_5_remove_from_cart(self):
-        pass
-
-    def test_6_place_order(self):
-        pass
+#     def test_6_place_order(self):
+#         pass

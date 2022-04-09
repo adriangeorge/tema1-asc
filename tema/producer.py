@@ -39,7 +39,7 @@ class Producer(Thread):
         @type kwargs:
         @param kwargs: other arguments that are passed to the Thread's __init__()
         """
-        Thread.__init__(self)
+        Thread.__init__(self, kwargs=kwargs)
         self.products = products
         self.marketplace = marketplace
         self.republish_wait_time = republish_wait_time
@@ -96,5 +96,6 @@ class Producer(Thread):
                     # self.marketplace.log(log_msg, str(self.kwargs['name']))
                     sleep(self.republish_wait_time)
 
-            if len(self.marketplace.consumers) == 0:
-                loopFlag = False
+                if len(self.marketplace.consumers) == 0:
+                    loopFlag = False
+                    break

@@ -35,7 +35,7 @@ class Consumer(Thread):
         :type kwargs:
         :param kwargs: other arguments that are passed to the Thread's __init__()
         """
-        Thread.__init__(self)
+        Thread.__init__(self, kwargs=kwargs)
 
         # Init variables
         self.carts = carts
@@ -55,6 +55,8 @@ class Consumer(Thread):
             cart_id = self.marketplace.new_cart()
             self.marketplace.assign_owner(cart_id, str(self.kwargs['name']))
             cart_iter = iter(cart)
+            log_msg = "NEW CART" + str(cart_id)
+            self.marketplace.log(log_msg, str(self.kwargs['name']))
 
             # Find next item in cart to request
             req_item = next((item for item in cart_iter), None)
@@ -69,13 +71,13 @@ class Consumer(Thread):
                     res = self.marketplace.add_to_cart(
                         cart_id, req_item['product'])
 
-                    if(res):
+                    if res:
                         # Log request success
                         # log_msg = "I have RECEIVED " + str(req_item['product'])
                         # self.marketplace.log(log_msg, str(self.kwargs['name']))
                         req_item['quantity'] -= 1
 
-                        if(req_item['quantity'] == 0):
+                        if req_item['quantity'] == 0:
                             req_item = next((item for item in cart_iter), None)
                     else:
                         # Log request failure
@@ -91,8 +93,8 @@ class Consumer(Thread):
 
                     req_item['quantity'] -= 1
 
-                    if(req_item['quantity'] == 0):
-                        req_item = next((item for item in cart_iter), None)
+                    if req_item['quantity'] == 0 :
+                        req_item=next((item for item in cart_iter), None)
 
             # All items in cart were processed, place the order
             # log_msg = "Got all items! PLACING ORDER!"

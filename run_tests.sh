@@ -18,7 +18,7 @@ done
 rm -f ${TESTS}/*.out.sorted
 
 # Run tests
-for i in {1..10}
+for i in {1..1}
 do
     prefix=$(printf "%02d" $i)
     rm -f "${TESTS}/$prefix".out
