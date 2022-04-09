@@ -35,8 +35,7 @@ class Marketplace:
         # File logging
         logger = logging.getLogger("log_asc")
         logger.setLevel(logging.INFO)
-        rfh = RotatingFileHandler(
-            'my_log.log', maxBytes=32000, backupCount=10)
+        rfh = RotatingFileHandler('my_log.log', mode='w')
         rfh.setLevel(logging.INFO)
         formatter = logging.Formatter(
             # %(asctime)s - %(name)s - %(levelname)s -
@@ -44,7 +43,7 @@ class Marketplace:
         rfh.setFormatter(formatter)
         logger.addHandler(rfh)
         self.logger = logger
-        self.mname = "market"
+        self.mname = "MK"
         self.all_completed = False
 
     # Wrapper on logger
@@ -84,18 +83,15 @@ class Marketplace:
         prod_esem = self.producers[producer_id]['empty_sem']
         prod_fsem = self.producers[producer_id]['full_sem']
 
-        log_msg = "REQ PUB S:PROD[" + \
-            str(producer_id) + "] " + str(product)
-        self.log(log_msg, self.mname)
         acquired = prod_esem.acquire(blocking=False)
         if not acquired:
-            log_msg = "REJ PUB S:PROD[" + \
+            log_msg = "REJ PUB REQ S:PROD[" + \
                 str(producer_id) + "] " + str(product)
             self.log(log_msg, self.mname)
             return False
 
         prod_queue.append([product, True])
-        log_msg = "ACC PUB S:PROD[" + \
+        log_msg = "ACC PUB REQ S:PROD[" + \
             str(producer_id) + "] " + \
             str(product) + " SLOTS [" + \
             str(self.q_limit - len(prod_queue)) + \
@@ -150,10 +146,10 @@ class Marketplace:
 
                 if prod[0].name == name and prod[1]:
                     item_prod = (prod, producer)
-                    log_msg = "ITEM AVAILABLE " + \
-                        str(prod) + " IN PROD[" + \
-                        str(producer['id']) + ']'
-                    self.log(log_msg, self.mname)
+                    # log_msg = "ITEM AVAILABLE " + \
+                    #     str(prod) + " IN PROD[" + \
+                    #     str(producer['id']) + ']'
+                    # self.log(log_msg, self.mname)
                     return item_prod
 
     def add_to_cart(self, cart_id: int, product: Product):
@@ -169,8 +165,8 @@ class Marketplace:
         :returns True or False. If the caller receives False, it should wait and then try again
         """
 
-        log_msg = "REQ ADD S:CART[" + str(cart_id) + "] " + str(product)
-        self.log(log_msg, self.mname)
+        log_msg = "ADD REQ [" + self.carts[cart_id]['owner'] + "][C" + str(cart_id) + "] " + str(product)
+        
 
         # Get the referenced cart
         c_iter = iter(self.carts)
@@ -188,10 +184,12 @@ class Marketplace:
 
                 # Add item to user's cart
                 cart['items'].append(item_prod)
+                log_msg = "ACC " + log_msg
+                self.log(log_msg, self.mname)
                 return True
 
         else:
-            log_msg = "ITEM NOT AVAILABLE " + str(product)
+            log_msg = "REJ " + log_msg
             self.log(log_msg, self.mname)
             return False
 
@@ -218,8 +216,8 @@ class Marketplace:
         self.carts[cart_id]['items'].remove(prod_to_remove)
         # Log DEL request
         af = len(self.carts[cart_id]['items'])
-        log_msg = "REQ DEL " + str(prod_to_remove) + str(bf) + " " + str(af)
-        self.log(log_msg, self.mname) 
+        log_msg = "DEL REQ " + str(prod_to_remove) + str(bf) + " " + str(af)
+        self.log(log_msg, self.mname)
 
     def place_order(self, cart_id: int):
         """
@@ -228,16 +226,16 @@ class Marketplace:
         :type cart_id: Int
         :param cart_id: id cart
         """
-        # Mark cart as completed and check if there are any remaining
-        # Carts, if no remaining carts send shutdown signal to producer
+        # Mark cart as completed
         self.carts[cart_id]['completed'] = True
 
         # Remove bought items from producer storage
+
+        log_msg = "\n"
         for item in self.carts[cart_id]['items']:
             producer = item[1]
             prod_esem = producer['empty_sem']
             prod_fsem = producer['full_sem']
-
             prod_fsem.acquire()
             producer['queue'].remove(item[0])
             prod_esem.release()
@@ -249,9 +247,14 @@ class Marketplace:
 
         # Print output
         for item in self.carts[cart_id]['items']:
-            print(cart['owner'] + ' bought ' + str(item[0][0]))
+            log_msg += self.carts[cart_id]['owner'] + ' bought ' + str(item[0][0]) + '\n'
+
+        print(log_msg[1:-1])
+        self.log(log_msg, self.mname)
 
     def sign_out(self, cons: str):
+        log_msg = "LOGOUT " + cons
+        self.log(log_msg, self.mname)
         self.consumers.remove(cons)
 
 
